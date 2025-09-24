@@ -21,8 +21,15 @@ def index():
         news_text = request.form.get("news")
         if news_text:
             transformed_text = vectorizer.transform([news_text])
-            prediction = model.predict(transformed_text)[0]
-            prediction = "Real News ✅" if prediction == 1 else "Fake News ❌"
+            raw_score = model.decision_function(transformed_text)[0]
+            prediction_label = model.predict(transformed_text)[0]
+            confidence = round(abs(raw_score) * 10, 2)
+            confidence = min(confidence, 99.9)
+
+            # Build label + confidence
+            label = "✅ Real News" if prediction_label == 1 else "❌ Fake News"
+            prediction = f"{label} (Confidence: {confidence}%)"
+
     return render_template("index.html", prediction=prediction)
 
 if __name__ == "__main__":
